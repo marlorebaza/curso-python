@@ -51,5 +51,3 @@ def show_variable_global():
 set_variable_global()
 show_variable_global()
 
-# ACA ME QUEDO: https://platzi.com/clases/1378-python/14089-operadores-logicos/
-
