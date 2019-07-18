@@ -51,3 +51,32 @@ def show_variable_global():
 set_variable_global()
 show_variable_global()
 
+
+'''
+    Python reusa los espacios en memoria si los valores coinciden
+'''
+cadena = 'Peru'
+# id: función que devuelve la dirección en memoria de una variable / objeto 
+print(id(cadena) == id('Peru')) # True
+# como era de esperar los caracteres con tilde o mayuscula / minuscula no son considerados iguales
+print(id('u') == id('ú')) # False
+print(id('u') == id(cadena[-1])) # True
+# las cadenas son inmutables. Para comprobarlo adicionamos caracteres a la variable "cadena",
+# luego de esto su dirección en memoria ya no será la misma, python le asignará otra.
+# Estos debido a que python reusa el espacio en memoria y dado que podría estar siendo referenciado por otras variables
+# decide no trabajar sobre el mismo espacio.
+cadena += "anos"
+print(id(cadena) == id('Peru')) # False
+
+
+def my_function():
+    ''' Documentación de esta función...  '''
+    pass
+
+# jelp: proporciona un mensaje informativo del objeto enviado
+help(my_function)
+help(dir)
+
+## dir: retorna una lista con los atributos (propiedades y funciones) del objeto
+print(dir(cadena))
+
