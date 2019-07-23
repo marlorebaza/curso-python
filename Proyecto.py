@@ -72,6 +72,6 @@ if __name__ == '__main__':
 '''
     AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
     ACA ME QUEDO:
-    https://platzi.com/clases/1378-python/14094-operaciones-con-strings-y-el-comando-delete/
+    https://platzi.com/clases/1378-python/14096-for-loops/
 '''
     
