@@ -80,3 +80,15 @@ help(dir)
 ## dir: retorna una lista con los atributos (propiedades y funciones) del objeto
 print(dir(cadena))
 
+
+''' 
+Slices (rebanadas):
+cadena[inicio:final:pasos]
+- inicio x defecto es 0
+- final (no incluido), x defecto es la longitud
+- pasos x defecto es 1, si es negativo comienza desde el final hacia la izquierda
+'''
+my_value = "vamos Perú!"
+print(my_value[:]) # vamos Perú!
+print(my_value[:3:-1]) #úreP s
+print(my_value[2::2]) # msPr!
