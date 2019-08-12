@@ -92,3 +92,67 @@ my_value = "vamos Perú!"
 print(my_value[:]) # vamos Perú!
 print(my_value[:3:-1]) #úreP s
 print(my_value[2::2]) # msPr!
+
+
+'''
+Iteradores:
+'''
+def fibonacci(max):
+    a, b = 0, 1
+    while a < max:
+        yield a
+        a, b = b, a+b
+        
+iterable1 = fibonacci(20)
+
+# iteramos generador
+print([num for num in iterable1])
+
+# una vez que la iteración sobre un generador ha terminado, ya no podemos utilizarlo
+print([num for num in iterable1]) # ya no retornará nada
+print([num for num in fibonacci(30)]) # creamos un nuevo iterable
+
+'''
+Listas:
+'''
+# Concatenación de listas
+list1 = [1, 2, 3, 4, 5]
+list2 = list(range(6, 11))
+print(list1 + list2) # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# multiplicacion de listas
+print(list1 * 3) # [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5]
+
+# filtrar:
+# - filter(funcion, iterable): retorna un iterador sobre los elementos que coincidan con la funcion enviada
+list3 = ['mazio', 'pele', 'lolo', 'malo']
+filterList3 = filter(lambda e: e.startswith('ma'), list3)
+# - next(iterable, por_defecto): retorna el elemento siguiente del iterable. Si se proporciona un valor por_defecto
+# se devolverá este valor, en lugar de un StopIteration cuando se haya terminado la iteración
+print('resultado: {}'.format(next(filterList3, None))) # mazio
+
+'''
+Diccionarios
+'''
+dict1 = {'age': 29, 'name': 'ronaldo', 'nationality': 'brasilian'}
+# llaves
+for key in dict1.keys():
+    print(key)
+    
+# valores
+for value in dict1.values():
+    print(value)
+    
+# elemento completo
+for key, value in dict1.items():
+    print('{}: {}'.format(value, key))
+    
+# si se quiere obtener un valor con una llave inexiste, se arrojará una excepción
+#print(dict1['noExisto'])
+
+# mejor es obtenerla de esta forma para poder controlar
+print(dict1.get('noExisto', 'no existo, pero tengo este valor x defecto :)'))
+
+# update(): agrega las llaves y valores. En caso ya existan las llaves, reemplaza los valores
+dict1.update({'name': 'pele', 'age': 71, 'goals': 1500})
+print(dict1)
