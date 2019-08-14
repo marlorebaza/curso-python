@@ -147,6 +147,6 @@ if __name__ == '__main__':
 '''
     AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
     ACA ME QUEDO:
-    https://platzi.com/clases/1378-python-practico/14169-tuplas-y-conjuntos/
+    https://platzi.com/clases/1378-python-practico/14172-python-comprehensions/
 '''
     
