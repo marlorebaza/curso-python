@@ -1,7 +1,6 @@
 import collections
 import random
 
-
 if __name__ == '__main__':
     '''
         Operadores matematicos
@@ -229,3 +228,46 @@ print(uids_and_names) # {1: 'marlo', 2: 'pele', 3: 'ronaldo'}
 repeated_numbers = [random.randint(1, 3) for number in range(100)]
 non_repeated_numbers = {number for number in repeated_numbers}
 print(non_repeated_numbers)
+
+'''
+Busqueda binaria
+'''
+def binary_search(iterable, target, min_index, max_index):
+
+    if min_index > max_index:
+        return False
+    
+    # division de enteros, sin tomar decimales
+    mid = (min_index + max_index) // 2 
+    
+    if target == iterable[mid]:
+        return True
+    elif target < iterable[mid]:
+        return binary_search(iterable, target, min_index, mid - 1)
+    else:
+        return binary_search(iterable, target, mid + 1, max_index)
+    
+    
+    '''
+    # Sin recursividad
+    mid = -1
+    while min_index <= max_index:
+        
+        mid = (min_index + max_index) // 2
+    
+        if target == iterable[mid]:
+            return True
+        elif target < iterable[mid]:
+            max_index = mid - 1
+        else:
+            min_index = mid + 1
+            
+    return False
+    '''
+
+numbers = [random.randint(0, 100) for _ in range(10)]
+numbers.sort()
+print (numbers)
+target = int(input('¿Qué número deseas buscar?'))
+found = binary_search(numbers, target, 0, len(numbers) - 1)
+print(found)

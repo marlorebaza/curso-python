@@ -1,19 +1,29 @@
 import sys
+import csv
+import os
 
-clients = [
-        {
-            'name': 'Ricardo',
-            'company': 'Google',
-            'email': 'ricardo@google.com',
-            'position': 'Master'
-        },
-        {
-            'name': 'Pablo',
-            'company': 'Mocosoft',
-            'email': 'pablo@mocosoft.com',
-            'position': 'Developer'
-        }
-    ]
+clients = []
+# el '.' como prefijo del nombre del archivo indica que debe ser tr
+CLIENT_FILE_NAME = '.clients.csv'
+CLIENT_SCHEMA = ['uid', 'name', 'company', 'email', 'position']
+
+def _initialize_clients_from_storage():
+    # open(): Abre un archivo. por defectto el modo en el que se abre es lectura (r)
+    # en modo lectura el archivo debe existir, sino arrojará la excepción: 
+    # FileNotFoundError: [Errno 2] No such file or directory
+    with open(CLIENT_FILE_NAME) as f:
+        reader = csv.DictReader(f, CLIENT_SCHEMA)
+        for row in reader:
+            clients.append(row)
+
+def _save_clients_from_storage():
+    client_temp_file_name = '{}.tmp'.format(CLIENT_FILE_NAME)
+    with open(client_temp_file_name, mode = 'w') as f:
+        writer = csv.DictWriter(f, CLIENT_SCHEMA)
+        writer.writerows(clients)
+
+    os.remove(CLIENT_FILE_NAME)
+    os.rename(client_temp_file_name, CLIENT_FILE_NAME)
 
 def create_client(client):
     global clients
@@ -27,6 +37,9 @@ def create_client(client):
     
 def list_clients():
     global clients
+    
+    print('uid | name | company | email | position')
+    print('****************************************')
     
     # enumerate(): retorna un enumerador con el indice y el valor del elemento
     for index, client in enumerate(clients):
@@ -95,6 +108,7 @@ def _get_client_name(message = 'What is the client name?'):
     
     
 def _print_welcome():
+    
     print('WELCOME TO PLATZI VENTAS')
     print('*' * 5)
     print('What would you like to do today?')
@@ -106,6 +120,9 @@ def _print_welcome():
 
 
 if __name__ == '__main__':
+    
+    _initialize_clients_from_storage()
+    
     _print_welcome()
     
     command = input().upper()
@@ -117,12 +134,10 @@ if __name__ == '__main__':
             'email': _get_field_value_of('email'),
             'position': _get_field_value_of('position')
         })
-        list_clients()
     elif command == 'L':
         list_clients()
     elif command == 'D':
         delete_client(_get_client_name())
-        list_clients()
     elif command == 'U':
         update_client(
             _get_client_name(),
@@ -132,7 +147,6 @@ if __name__ == '__main__':
                 'email': _get_field_value_of('email'),
                 'position': _get_field_value_of('position')
             })
-        list_clients()
     elif command == 'S':
         client_name = _get_client_name()
         found_client = search_client(client_name)
@@ -143,10 +157,13 @@ if __name__ == '__main__':
             
     else:
         print('Invalid command') 
+        
+    
+    _save_clients_from_storage()
     
 '''
     AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
     ACA ME QUEDO:
-    https://platzi.com/clases/1378-python-practico/14172-python-comprehensions/
+    https://platzi.com/clases/1378-python-practico/14176-decoradores0075/
 '''
     
