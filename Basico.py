@@ -268,6 +268,78 @@ def binary_search(iterable, target, min_index, max_index):
 numbers = [random.randint(0, 100) for _ in range(10)]
 numbers.sort()
 print (numbers)
-target = int(input('¿Qué número deseas buscar?'))
+#target = int(input('¿Qué número deseas buscar?'))
+target = 88
 found = binary_search(numbers, target, 0, len(numbers) - 1)
 print(found)
+
+
+'''
+*args Y **kwargs:
+- *args: captura las variables no nombradas en una tupla.
+- **kwargs: captura las variables nombradas en un diccionario.
+NOTA: al llamar a una función, los parametros nombrados se deden enviar al final 
+'''
+
+def my_function(some_number, some_string, *arguments, **keyworded_arguments):
+    print('some_number = {} de tipo {}'.format(some_number, type(some_number)))
+    print('some_string = {} de tipo {}'.format(some_string, type(some_string)))
+    print('arguments = {} de tipo {}'.format(arguments, type(arguments)))
+    print('keyworded_arguments = {} de tipo {}'.format(keyworded_arguments, type(keyworded_arguments)))
+
+my_function(123, 'hi!', True, 12322, ':D', another_boolean=False, another_string = "12das", another_number = 123)
+# Resultado:
+#some_number = 123 de tipo <class 'int'>
+#some_string = hi! de tipo <class 'str'>
+#arguments = (True, 12322, ':D') de tipo <class 'tuple'>
+#keyworded_arguments = {'another_boolean': False, 'another_string': '12das', 'another_number': 123} de tipo <class 'dict'>
+
+
+'''
+Decoradores: son una función que envuelve a otra función para modificar o extender su comportamiento.
+En Python las funciones pueden recibir funciones como parámetros y pueden regresar funciones. 
+Los decoradores utilizan este concepto de manera fundamental.
+'''
+# Definimos un decorador que convierte a mayusculas el resultado de una función
+def to_upper(func):
+    # capturamos los parametros recibidos y los pasamos tal cual a la función que se está invocando
+    def wrapper(*args, **kwargs):
+        print('dentro de decorator - pre proceso')
+        result = func(*args, **kwargs).upper()
+        print('dentro de decorator - post proceso. resultado: {}'.format(result))
+        return result
+    
+    return wrapper
+
+# Para usar un decorador sobre una funcióm, prefijamos el simbolo arroba (@) al nombre del decorador y lo ponemos
+# sobre la funcion
+@to_upper
+def say_hello(value):
+    return 'Hola {}'.format(value)
+
+print(say_hello('marlo'))
+
+
+'''
+Clases:
+'''
+class Client():
+    
+    def __init__(self, name, age):
+        self.name= name
+        self.age = age
+        # por convención las variables privadas se nombran con un guion bajo inicial. 
+        self._dont_use_me = ':D'
+        
+    def say_hello(self):
+        print('Hola mi nombre es {} y tengo {} años.'.format(self.name, self.age))
+
+client1 = Client('marlo', 29)
+client1.say_hello()
+# no deberían usarse las variables privadas, aunque tecnicamente sea posible
+print(client1._dont_use_me)
+
+# __new__:
+# Fuente: https://www.code-learner.com/how-to-use-python-__new__-method-example/
+        
+        
