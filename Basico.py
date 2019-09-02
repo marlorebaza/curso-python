@@ -1,5 +1,7 @@
 import collections
 import random
+from pip._vendor.idna.core import valid_contexto
+from functools import update_wrapper
 
 if __name__ == '__main__':
     '''
@@ -302,11 +304,10 @@ Los decoradores utilizan este concepto de manera fundamental.
 '''
 # Definimos un decorador que convierte a mayusculas el resultado de una función
 def to_upper(func):
+    print('dentro de decorator')
     # capturamos los parametros recibidos y los pasamos tal cual a la función que se está invocando
     def wrapper(*args, **kwargs):
-        print('dentro de decorator - pre proceso')
         result = func(*args, **kwargs).upper()
-        print('dentro de decorator - post proceso. resultado: {}'.format(result))
         return result
     
     return wrapper
@@ -317,29 +318,312 @@ def to_upper(func):
 def say_hello(value):
     return 'Hola {}'.format(value)
 
+print('Se va a ejecutar say_hello(...)')
 print(say_hello('marlo'))
+
+# Decorador con parámetros
+def repeat(times = 5):
+    def decorator(fn):
+        def wrapper(*args, **kwargs):
+            # iteramos times y llamamos a la funcion decorada
+            for _ in range(times):
+                fn(*args, **kwargs)
+        # retornamos la función wrapper
+        return wrapper
+    # retornamos el decorador
+    return decorator
+
+# repeat(10) invocará a la función "repeat" que devuelve un decorador 
+@repeat(10)    
+def perform(value):
+    print(value)
+    
+# Dado que la función "repeat" no es un decorador en sí (ya que el decorador lo retorna adentro), se debe indicar
+# con parentesis como una función normal
+@repeat()
+def perform2(value):
+    print(value)
+    
+perform("Hola soy marlo")
+perform2('Hola causa')
+
+# Multiples decoradores a una función: los decoradores se ejecutaán de adentro hacia afuera
+def add_preffix(fn):
+    def wrapper(*args, **kwargs):
+        return "O_O - " + fn(*args, **kwargs)
+    
+    return wrapper
+
+# primero se ejecutrá "add_preffix" y luego "to_upper"
+@to_upper
+@add_preffix
+def gretting_in_spanish(name):
+    return "Hola humano %s" % name
+
+print(gretting_in_spanish("Marlo"))
 
 
 '''
 Clases:
-'''
-class Client():
+- En python solamente es posible definir un unico constructor (__init__),
+ya que python no soporta la sobrecarga de métodos.
+Si en algo ayuda es posible definir un valor x defecto a un parámetro con el signo igual:
+'def method(p2, p1 = None):...', de esta manera no es necesario que se envíe cuando se llama a la función:
+'method(12)'
+'''    
+class Person:
     
-    def __init__(self, name, age):
+    # __new__(...): función llamada primera, antes que __init__, 
+    # y es responsable de retornar una nueva instancia de la clase
+    # Recibe como parámetro la clase actual
+    def __new__(cls, name, age):
+        print('inside of Person.__new__(...)')
+        if cls == Student:
+            print('se esá creando un estudiante')
+            # super(): hace referencia al objeto padre, en este caso sería object
+            return super(Person, cls).__new__(cls)
+        else:
+            print('NO se esá creando un estudiante, se forzará la creación de uno >:)')
+            return Student(name, age)
+    
+    # __init__(...): inicializa un objeto de la clase
+    def __init__(self, name, age, email = None):
+        print('inside of Person.__init__(name, age, email)')
         self.name= name
         self.age = age
+        self.email = email
         # por convención las variables privadas se nombran con un guion bajo inicial. 
         self._dont_use_me = ':D'
         
     def say_hello(self):
         print('Hola mi nombre es {} y tengo {} años.'.format(self.name, self.age))
+        
+# Indicamos la clase base entre parentesis (herencia).
+# Object es la clase base x defecto, Desde python 3 'class Person:' es equivalente a
+# 'class Person(Object):'
+class Student(Person):
+    
+    def __init__(self, name, age):
+        print('inside of Student.__init__(...)')
+        super(Student, self).__init__(name, age)
+        
+class Teacher(Person):
+    
+    def __init__(self, name, age):
+        print('inside of Teacher.__init__(...)')
+        super(Student, self).__init__(name, age)
 
-client1 = Client('marlo', 29)
-client1.say_hello()
+student1 = Student('marlo', 29)
+student1.say_hello()
 # no deberían usarse las variables privadas, aunque tecnicamente sea posible
-print(client1._dont_use_me)
+print(student1._dont_use_me)
+print ('-------------------')
+teacher1 = Teacher('lula', 31)
+teacher1.say_hello()
 
-# __new__:
-# Fuente: https://www.code-learner.com/how-to-use-python-__new__-method-example/
+'''
+Patron singleton
+'''
+class MySingleton:
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        print('inside of MySingleton.__new__(...)')
+        # 'cls._instance' es equivalente a 'MySingleton._instance'
+        if not cls._instance:
+            cls._instance = super(MySingleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+mySingleton1 = MySingleton();
+mySingleton2 = MySingleton();
+mySingleton3 = MySingleton();
+mySingleton4 = MySingleton();
+print(id(mySingleton1) == id(mySingleton2) == id(mySingleton3) == id(mySingleton4)) # True
+# Mas info sobre __new__:
+# https://howto.lintel.in/python-__new__-magic-method-explained/
+
+# @classmethod vs @staticmethod
+class MyClass:
+    
+    # En python todas las variables a nivel de clase son consideradas estátics
+    im_static = 'Hi'
+    
+    def __init__(self, name):
+        self.name = name
+    
+    # Método de instancia: Solamente puede ser llamado desde una instancia de la clase.
+    # Recibe implicitamente la instancia como primer parámetro
+    def say_hi(self):
+        print ('Hi %s' % self.name)
         
+    # Método de clase: la clase del objeto es enviada implicitamente como primer parámetro.
+    # Puede ser llamado desde una instancia o anteponiendo la clase directamente
+    @classmethod
+    def createInstance(cls, name):
+        print(cls)
+        return cls(name)
+    
+    # Método estatico: no recibe ni la clase, ni la instancia.
+    # Puede ser llamado desde una instancia o anteponiendo la clase directamente
+    @staticmethod
+    def execute_say_hi(instance):
+        instance.say_hi()
         
+myClass1 = MyClass('Marlo')
+myClass1.say_hi()
+
+myClass2 = myClass1.createInstance('Marlo')
+myClass3 = MyClass.createInstance('Marlo')
+
+MyClass.execute_say_hi(myClass2)
+MyClass.execute_say_hi(myClass3)
+
+# al crearse una instancia de una clase, las variables que tenga definidias a nivel de clase 
+# se crearán dentro de esta instancia y ya no serán las mismas que las de la1 clase en si misma. Ejemplo
+MyClass.im_static = ':D'
+myClass1.im_static = 'MARLO'
+print (MyClass.im_static == myClass1.im_static) # False
+
+'''
+Scope: es la parte del programa en el que podemos tener acceso a un namespace sin necesidad de prefijos.
+En cualquier momento determinado, el programa tiene acceso a tres scopes:
+1. El scope dentro de una función (que tiene nombres locales)
+2. El scope del módulo (que tiene nombres globales)
+3. El scope raíz (que tiene los built-in names)
+Cuando anidamos una función dentro de otra función, su scope también queda anidado dentro del scope de la función padre.
+'''
+global_variable = 10
+def returnFunction(parent_local_variable):
+    another_parent_local_variable = 20
+    def inside(local_variable):
+        # Para poder manipular una variable que se encuentra fuera del scope local podemos utilizar los keywords:
+        # - global: variable creada a nivel de módulo
+        # - nonlocal: variable creada a nivel de función (en una función padre).
+        # Si no se hiciese uso de estas palabras claves entonces se crearían nuevas variables locales con esos nombres
+        nonlocal another_parent_local_variable
+        another_parent_local_variable = 100
+        global global_variable
+        global_variable = 50
+        # podemos acceder al scope global (modulo), de la función padre y al propio scope de la función
+        print(local_variable + parent_local_variable + global_variable)
+    return inside
+
+plus = returnFunction(35) 
+# Al llamar a la función "plus", esta podrá acceder al scope de su función padre, dando como resultado:
+# local_variable = 10 + parent_local_variable = 35 + global_variable = 50
+plus(10) # 95
+# comprobamos el cambio de valor de la variable global
+print(global_variable) # 50
+
+
+
+'''
+Emulando Framework click
+
+'''
+class Group:
+    
+    def __init__(self):
+        self._commands = []
+    
+    def get_commands(self):
+        return self._commands
+    
+    def command(self):
+        def decorator(fn):
+            self._commands.append(fn)
+        return decorator
+    
+    def add_commands(self, commands):
+        self._commands.append(commands)
+        
+
+def group():
+    def decorator(fn):
+        #desc = help(fn)
+        group = Group()
+        #fn(group.get_ctx())
+        return group
+    return decorator
+
+def option(*args, **kwargs):
+    def decorator(fn):
+        # haz algo con los parámetros externos e internos...
+        #print('wrapper pa %s'  % fn)
+        if not hasattr(fn, '__options__'):
+            fn.__options__ = []
+        # hacemos un "prepend", es decir agregamos al inicio, ya que los decoradores se ejeutan de adentro hacia afuera.
+        # De esta forma alineamos los decoradores de abajo hacia arriba con respecto a los parámetros de la 
+        # funcion en cuestion
+        fn.__options__ = [(args, kwargs)] + fn.__options__
+        #fn.__options__.insert(0,(args, kwargs))
+        return fn
+    return decorator
+    
+    
+''' ACA ME QUEDO
+- AVERIGUAR SOBRE update_wrapper.. ENTENDER Y EXPLICARLO.. DE MOMENTO LE ESTOY ENVIANDO
+UN CONTEXTO VACIO...
+- HABRIA QUE VER EL METODO GET_CURRENT_CONTEXT... PA VER COMO  SACA EL CONTEXTO ACTUAL, IMPLEMETARLO Y EXPLICARLO
+- DESPUES CONTINUAR ACA: https://platzi.com/clases/1378-python-practico/14186-actualizacion-de-cliente/
+- 
+'''
+def pass_context(fn):
+    def new_func(*args, **kwargs):
+        return fn({}, *args, **kwargs)
+    return update_wrapper(new_func, fn)
+
+# Bloque 1 (emula a clients/commands.py)
+
+@group()
+def persons():
+    """Manage Persons"""
+
+@persons.command()
+@option('-n', '--name')
+@option('-a', '--age')
+@pass_context
+def create(ctx, name, age):
+    print('ejecutando create. argumentos recibidos ctx = {ctx}, name = {name} y age = {age}'
+          .format(ctx=ctx, name=name, age=age))
+    
+@persons.command()
+@pass_context
+def list(ctx):
+    print('ejecutando list. argumentos recibidos ctx = {}'.format(ctx))
+    
+all = persons
+
+# Bloque 2 (emula a pv.py)
+
+@group()
+@pass_context
+def cli(ctx):
+    ctx.obj = {}
+
+cli.add_commands(all)
+
+def analize(group):
+    for command in group.get_commands():
+        if type(command) == Group:
+            print('analizando grupo')
+            analize(command)
+        else:
+            print('se va a ejecutar %s' % command.__name__)
+            if hasattr(command, '__options__'):
+                # deberían haber tantas opciones como parámetros definidos en la función (para esta pequeña logica)
+                # estoy pasando de frente todas las opciones sin descomponer la data dentro de cada una que la librería
+                # Click si lo hace para mostrar un input, un label, validación, etc... 
+                command(*command.__options__)
+            else:
+                command()
+            
+analize(cli)
+ 
+'''
+    AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
+'''
+
+
+
+
+    
+

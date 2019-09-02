@@ -160,11 +160,5 @@ if __name__ == '__main__':
         
     
     _save_clients_from_storage()
-    
-'''
-    AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
-    ACA ME QUEDO:
-    ANTES DE CONTINUAR LEE Y EXPLICA EN BASICO.PY SOBRE __NEW__: https://www.code-learner.com/how-to-use-python-__new__-method-example/
-    https://platzi.com/clases/1378-python-practico/14336-scopes-and-namespaces2697/
-'''
+   
     
