@@ -14,7 +14,7 @@ class Client:
         
     def to_dict(self):
         # vars(object): retorna el valor del atributo "__dict__" del objeto enviado.
-        # si el objeto enviado no tiene este atributo arrojará una excepción TypeError.
+        # si el objeto enviado no tiene ese atributo arrojará una excepción TypeError.
         # "vars(self)" es equivalente a "self.__dict__"
         return vars(self)
     

@@ -19,6 +19,7 @@ def create(ctx, name, company, email, position):
     client = Client(name, company, email, position)
     client_service = ClientService(ctx.obj['client_table'])
     client_service.create_client(client)
+    click.echo('Client created.')
 
 
 @clients.command()
@@ -39,16 +40,53 @@ def list(ctx):
 
 
 @clients.command()
+# el primer parámetro enviado a @argument debe ser igual al nombre del parámetro con el que hará match en la función
+@click.argument('client_uid', type=str)
 @click.pass_context
 def update(ctx, client_uid):
     """ Updates a client """
-    pass
+    client_service = ClientService(ctx.obj['client_table'])
+    
+    client = _get_client(client_service.list_clients(), client_uid)
+    
+    if client:
+        # desempaquetamos ciente encontrado (key: value) para enviarlo al constructor de Client
+        client = _update_client_flow(Client(**client))
+        client_service.update_client(client)
+        click.echo('Client updated.')
+    else:
+        click.echo('Client not found.')
+
+
+def _update_client_flow(client):
+    click.echo('Leave empty if you dont want to modify the value')
+    
+    client.name = click.prompt('New name', type=str, default=client.name)
+    client.company = click.prompt('New company', type=str, default=client.company)
+    client.email = click.prompt('New email', type=str, default=client.email)
+    client.position= click.prompt('New position', type=str, default=client.position)
+    
+    return client
 
 
 @clients.command()
+@click.argument('client_uid', type=str)
 @click.pass_context
 def delete(ctx, client_uid):
     """ Deletes a client """
-    pass
+    client_service = ClientService(ctx.obj['client_table'])
+    
+    client = _get_client(client_service.list_clients(), client_uid)
+    
+    if client:
+        client_service.delete_client(client)
+        click.echo('Client deleted.')
+    else:
+        click.echo('Client not found.')
+        
+        
+def _get_client(clients, client_uid):
+    return next(filter(lambda c: c['uid'] == client_uid, clients), None)
+    
 
 all = clients

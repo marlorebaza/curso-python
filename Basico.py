@@ -1,7 +1,27 @@
 import collections
 import random
+from contextlib import contextmanager
 from pip._vendor.idna.core import valid_contexto
 from functools import update_wrapper
+
+
+'''
+Sobre los PEP's (python enhancement proposal): 
+
+FUENTE: https://www.python.org/dev/peps/
+
+Describen cambios al lenguaje o a los estándares alrededor.
+
+
+Los principales:
+
+- PEP8: Python style guide
+- PEP257: Python docstrings (sobre como se debe documentar)
+- PEP20: Como un resumen de buenas practicas. Se puede ver ejecutando: import this
+
+Info de esto en platzi:
+https://platzi.com/clases/1378-python-practico/14191-python-2-vs-3-y-cierre-del-curso/
+'''
 
 if __name__ == '__main__':
     '''
@@ -519,6 +539,20 @@ print(global_variable) # 50
 Emulando Framework click
 
 '''
+class ClickContext:
+    # sobreescribimos este método para poder crear los atributos que no existan y evitar un error
+    # para esta pequeña emulación todos los atributos se crearán como diccionarios
+    def __getattribute__(self, name):
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return {}
+    
+context = ClickContext()
+
+def get_current_context():
+    return context
+    
 class Group:
     
     def __init__(self):
@@ -540,7 +574,7 @@ def group():
     def decorator(fn):
         #desc = help(fn)
         group = Group()
-        #fn(group.get_ctx())
+        fn()
         return group
     return decorator
 
@@ -557,18 +591,20 @@ def option(*args, **kwargs):
         #fn.__options__.insert(0,(args, kwargs))
         return fn
     return decorator
-    
-    
-''' ACA ME QUEDO
-- AVERIGUAR SOBRE update_wrapper.. ENTENDER Y EXPLICARLO.. DE MOMENTO LE ESTOY ENVIANDO
-UN CONTEXTO VACIO...
-- HABRIA QUE VER EL METODO GET_CURRENT_CONTEXT... PA VER COMO  SACA EL CONTEXTO ACTUAL, IMPLEMETARLO Y EXPLICARLO
-- DESPUES CONTINUAR ACA: https://platzi.com/clases/1378-python-practico/14186-actualizacion-de-cliente/
-- 
-'''
+
 def pass_context(fn):
     def new_func(*args, **kwargs):
-        return fn({}, *args, **kwargs)
+        return fn(get_current_context(), *args, **kwargs)
+    '''
+    Sobre: update_wrapper(funcion_envoltura, funcion_a_envolver[, atributos_a_asignar, atributos_a_actualizar])
+    La funcion_envoltura será actualizada con los atributos_a_asignar (seteo) y 
+    atributos_a_actualizar (el atributo debe ser un diccionario para poder hacer uso de su método update(). 
+    Por ejemplo: __dict__) de la funcion_a_envolver.
+    Finalmente se agregará la funcion_a_envolver en el atributo '__wrapped__' de la funcion_envoltura
+    y la funcion_envoltura será retornada
+    '''
+    # Ahora la nueva función envolverá a la función real y cuando sea invocada le pasará como primer parámetro
+    # el contexto actual y luego el resto de parámetros que reciba
     return update_wrapper(new_func, fn)
 
 # Bloque 1 (emula a clients/commands.py)
@@ -582,13 +618,13 @@ def persons():
 @option('-a', '--age')
 @pass_context
 def create(ctx, name, age):
-    print('ejecutando create. argumentos recibidos ctx = {ctx}, name = {name} y age = {age}'
-          .format(ctx=ctx, name=name, age=age))
+    print('ejecutando create. argumentos recibidos ctx.obj[''nombre_tabla''] = {ctx}, name = {name} y age = {age}'
+          .format(ctx=ctx.obj['nombre_tabla'], name=name, age=age))
     
 @persons.command()
 @pass_context
 def list(ctx):
-    print('ejecutando list. argumentos recibidos ctx = {}'.format(ctx))
+    print('ejecutando list. argumentos recibidos ctx.obj[''nombre_tabla''] = {}'.format(ctx.obj['nombre_tabla']))
     
 all = persons
 
@@ -597,7 +633,7 @@ all = persons
 @group()
 @pass_context
 def cli(ctx):
-    ctx.obj = {}
+    ctx.obj = {'nombre_tabla': '.cliente.csv'}
 
 cli.add_commands(all)
 
@@ -617,13 +653,179 @@ def analize(group):
                 command()
             
 analize(cli)
- 
+
+
 '''
-    AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
+Gestion de excepciones
 '''
+# bloque try:
+try:
+    number = int('NO SOU NUMERO')
+except ValueError:
+    # controla la excepción ValueError
+    print('Error: Número incorrecto')
+except:
+    # controla el resto excepciones
+    print('Algún error ocurrió')
+else:
+    # este bloque se ejecutará si no hubo errores lanzados
+    print('No hubo errores')
+finally:
+    # este bloque se ejecutará siempre
+    print('No me importa si hubo o no errores...')
+    
+# custom exception
+class MyException(BaseException):
+    pass
 
+def testMyException(value):
+    if value < 0:
+        raise MyException('Valor incorrecto')
+    else:
+        print('good!')
 
+testMyException(10) # good!
+try:
+    testMyException(-1)
+except MyException as e:
+    print(str(e)) # Valor incorrecto
+    
+    
+'''
+get / set atributos
+'''
+def iAmAnExample():
+    pass
+# setea el nombre del atributo, sobre el objeto indicado, con el valor especificado
+# equivalente a: iAmAnExample.__nuevo__ = ':D'
+setattr(iAmAnExample, '__nuevo__', ':D')
+# obtiene el valor del atributo del objeto indicado
+# equivalente a: iAmAnExample.__module__
+print(getattr(iAmAnExample, '__module__'))
+print(getattr(iAmAnExample, '__nuevo__'))
+# si el atributo no existe se lanzará una excepción, para evitar esto se debe indicar el valor x defecto como 3er parámetro
+print(getattr(iAmAnExample, '__noExisto__', 'D:'))
+    
+    
+'''
+with:
+Se usa para envolver la ejecución de un bloque con métodos definidos por un gestor de contexto (context manager).
 
+Un context manager es un objeto que define el contexto a ser establecido en tiempo de ejecución cuando se ejecuta una
+sentencia "with". El context manager maneja la "entrada a" y la "salida de" deseados para la ejecución del bloque de
+codigo.
+Los context manager son normalmente invocados usando la sentencia "with", pero también puedes ser usados invocando
+directamente a sus metodos.
+Los usos tipicos de un context manager son para guardar o restaurar varios tipos de estados globales, abrir o cerrar
+recursos, abrir o cerrar archivos, etc
 
+Mas información sobre tipos de contexts managers en https://docs.python.org/2/library/stdtypes.html#typecontextmanager
+
+Info en platzi: https://platzi.com/clases/1378-python-practico/14337-context-managers/
+'''
+class MyWith:
+    # Método de entrada al contexto, en tiempo de ejecución, relacionado con este objeto.
+    # La sentencia "with" vinculará lo retornado por este método a la variable indicada en la clausula "as" 
+    # en caso haya una. Es retorno es opcional.
+    def __enter__(self):
+        print('dentro de __enter__')
+        return 'Hola!'
+    
+    # Método de salida del contexto, en tiempo de ejecución, relacionado con este objeto.
+    # Parámetros:
+    # - exc_type: clase de la excepción que provocó la salida del contexto
+    # - exc_value: mensaje de la excepción que provocó la salida del contexto
+    # - traceback: rastreo de pila de la excepción que provocó la salida del contexto
+    def __exit__(self, exc_type, exc_value, traceback):
+        print('dentro de __exit__ - argumentos: exc_type = %s, exc_value = %s y traceback = %s' 
+              % (exc_type, exc_value, traceback))
+        # si se recibe una excepción y se quiere evitar que se propague se debe retornar un valor verdadero,
+        # de lo contrario, la excepción se procesará normalmente al salir de este método.
+        return True
+
+# Asignamos lo retornado por el método "__enter__" a la variable "mw"
+with MyWith() as mw:
+    print(mw) # Hola!
+    
+# No es necesario envolver el bloque with para controlar la excepción, ya que en el método "__exit__" 
+# se evita la propagación retornando True
+with MyWith() as mw:
+    raise Exception('Error!!')
+    
+# creamos una instancia de la clase
+mw = MyWith()
+print('antes de segundo with')
+with mw:
+    # dado que no hacemos uso de "as", la variable mw será una instancia de la clase "MyWith"
+    print(mw) # <__main__.MyWith object at XXXXX>
+    
+# NOTA: la ejecución de más de un item a la vez, los context managers son procesados como si multiples sentencias "with"
+# estuvieran enlazadas. Ejemplo
+'''
+with A() as a, B() as b:
+    pass
+# Es equivalente a:
+with A() as a:
+    with B() as b:
+        pass
+'''
+    
+'''
+Decorador @contextmanager:
+este decorador permite definir una función fábrica para gestionar contextos con la sentencia "with", sin la 
+necesidad de crear una clase o métodos separados "__enter__()" y "__exit__()"
+'''
+@contextmanager
+def myContextManager():
+    try:
+        print('dentro de try')
+        # Cuando la función cede (yields), el bloque dentro de "with" es ejecutado. En caso se ceda un valor 
+        # este se asignará a la variable indicada en la sentencia "as" en "with".
+        # Luego de salir del bloque "with", se reanuda la ejecución de esta función en el punto donde se cedió.
+        # En caso se genere una excepción no controlada en el bloque "with", se vuelve a generar en este punto
+        # la misma excepción. Es por esto que podemos controlarla en el bloque "except"
+        print('antes de yield')
+        yield "Hola!"
+        print('despues de yield')
+    except:
+        # Capturaremos cualquier excepción surgida en el bloque dentro de "with". En caso querramos evitar
+        # su propagacón no relazamos la excepción
+        print('dentro de except')
+        # Si no se indica una expresión en "raise" entoces se re-lanzará la última excepción activa en el scope actual.
+        # si no hay una excepción activa en el scope actual, entonces se arrojará la excepción TypeError.
+        # Comentamos raise
+        #raise
+        # Este bloque es equivalente a:
+        #except Exception as e:
+        #   raise e
+    else:
+        print('dentro de else')
+        pass
+    finally:
+        print('dentro de finally')
+        pass
+
+with myContextManager() as mcm:
+    print(mcm) # Hola!
+    
+with myContextManager() as mcm:
+    raise Exception('Error!!')
+    
+mcm = myContextManager()
+print('antes de segundo with')
+with mcm:
+    print(mcm) # <__main__.MyWith object at XXXXX>
+    
     
 
+'''
+    AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
+    
+    AHORA SI!: https://platzi.com/clases/1378-python-practico/14186-actualizacion-de-cliente/
+'''
+    
+
+asd = set([1, 2, 3, 4, 5, 4])
+print(asd)
+asd.add(12)
+print (asd)
