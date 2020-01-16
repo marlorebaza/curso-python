@@ -1,5 +1,6 @@
 import collections
 import random
+import os
 from contextlib import contextmanager
 from pip._vendor.idna.core import valid_contexto
 from functools import update_wrapper
@@ -759,7 +760,7 @@ with mw:
     # dado que no hacemos uso de "as", la variable mw será una instancia de la clase "MyWith"
     print(mw) # <__main__.MyWith object at XXXXX>
     
-# NOTA: la ejecución de más de un item a la vez, los context managers son procesados como si multiples sentencias "with"
+# NOTA: en una ejecución de más de un item a la vez, los context managers son procesados como si multiples sentencias "with"
 # estuvieran enlazadas. Ejemplo
 '''
 with A() as a, B() as b:
@@ -817,15 +818,52 @@ with mcm:
     print(mcm) # <__main__.MyWith object at XXXXX>
     
     
+'''
+    Formateo literal de cadena
+    La cadena debe ser precedida por el caracter "f"
+    FUENTE: https://www.geeksforgeeks.org/formatted-string-literals-f-strings-python/
+'''
+some_number = 12
+some_string = 'Marlo'
+print(f'Hola {"soy"} {some_string} y tengo {some_number} años')
+
+
+'''
+    Variables de entorno
+'''
+# Obtener un diccionario con todas las variables de entorno
+print(os.environ)
+# Obtener el valor de una variable
+print(os.environ.get('PATH'))
+print(os.environ['PATH'])
+# Agregar una variable
+os.environ['PRUEBA_A'] = 'ASDASDAS'
+os.environ.setdefault('PRUEBA_B', 'zcxzxczc')
+
+
+'''
+    Archivo __init__.py
+    - Son requeridos para que python trate al directorio como paquete y lo hace "importable". 
+    Este archivo en principio puede estar vacío, pero tambien puede ejecutar código de inicialización para el paquete.
+    FUENTEs:https://docs.python.org/3/tutorial/modules.html#packages
+    - Desde la version 3.3 ya no es requerido, ya que los paquetes tienen un espacio de nombres implicito. 
+    FUENTE: https://stackoverflow.com/questions/37139786/is-init-py-not-required-for-packages-in-python-3-3
+'''
+# Ejemplo de como podemos aprovechar el archivo __init__.py
+# FUENTE: https://stackoverflow.com/a/29509611
+
+# Dado que en __init__.py hemos importado el contenido de todos lo modulos dentro del paquete init_use,
+# importamos la función do_something sin indicar el módulo que la contiene:
+#from init_use.file1 import do_something
+from init_use import do_something
+do_something()
+    
+
 
 '''
     AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
     
     AHORA SI!: https://platzi.com/clases/1378-python-practico/14186-actualizacion-de-cliente/
 '''
-    
 
-asd = set([1, 2, 3, 4, 5, 4])
-print(asd)
-asd.add(12)
-print (asd)
+

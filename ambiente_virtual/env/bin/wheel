@@ -1,4 +1,4 @@
-#!/Users/marlorebazaloyola/Desktop/programacion/proyectos/app-web-sencilla/curso-python/ambiente_virtual/env/bin/python
+#!/Users/marlorebazaloyola/Desktop/programacion/curso-python/ambiente_virtual/env/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

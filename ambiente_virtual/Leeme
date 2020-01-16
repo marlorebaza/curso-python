@@ -1,11 +1,13 @@
 
 Ambiente Virtual:
-- fuente: https://platzi.com/clases/1378-python-practico/15301-entorno-virtual-en-python-y-su-importancia/
+- fuentes: 
+https://platzi.com/clases/1378-python-practico/15301-entorno-virtual-en-python-y-su-importancia/
+https://platzi.com/clases/1775-poo-python/25268-ambientes-virtuales/
 - instalar: pip install virtualenv
 - crear abiente virtual: virtualenv NOMBRE_AMBIENTE
 - se puede indicar el interpretador de python de la siguiente forma: virtualenv --python=python3 NOMBRE_AMBIENTE
-- inicializar ambiente (activar): source NOMBRE_AMBIENTE/bin/activate
+- inicializar (activar) ambiente: source NOMBRE_AMBIENTE/bin/activate
 - salir de ambiente: deactivate
-- paquets instalados en el ambiente: pip freeze
+- ver paquetes instalados en el ambiente: pip freeze
 - instalar paquetes de python desde archivo: pip install -r RUTA_ARCHIVO_REQUIREMENTS
 - Ver servidor web demo en main.py
