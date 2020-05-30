@@ -4,6 +4,8 @@ import os
 from contextlib import contextmanager
 from pip._vendor.idna.core import valid_contexto
 from functools import update_wrapper
+from astropy.wcs.docstrings import name
+from _ast import Name, Yield
 
 
 '''
@@ -121,6 +123,7 @@ print(my_value[2::2]) # msPr!
 '''
 Iteradores:
 '''
+# fibonacci con iterador propio
 def fibonacci(max):
     a, b = 0, 1
     while a < max:
@@ -214,6 +217,10 @@ months = Months(1, 2, 3)
 print(months.Enero) # equivalencia: months[0]
 print(months.Febrero) # equivalencia: months[1]
 print(months.Marzo) # equivalencia: months[2]
+
+# desempaquetar
+x, y, z = tuple1
+print(x, y, z) # 1 2 3
 
 '''
 Conjuntos
@@ -854,16 +861,87 @@ os.environ.setdefault('PRUEBA_B', 'zcxzxczc')
 
 # Dado que en __init__.py hemos importado el contenido de todos lo modulos dentro del paquete init_use,
 # importamos la función do_something sin indicar el módulo que la contiene:
-#from init_use.file1 import do_something
 from init_use import do_something
+# equivalente a:
+#from init_use.file1 import do_something
+#from init_use.file2 import do_something
 do_something()
+# Dado que el método do_something existe en en los módulos init_use.file1 y init_use.file2, 
+# prevalecerá el último importado en el archivo init_use/__init__.py, es decir el que está en init_use.file2
     
 
-
 '''
-    AVERIGUAR E IMPLEMENTAR INTERNALIZACION 
+    Raw string:
+    Se crea prefijando ua cadena con el caracter "r" o "R". 
+    Trata la barra invertida (\) como un carácter literal. 
+    Esto es útil cuando no queremos que se trate la barra invertida como 
+    un carácter de escape. 
+    FUENTE: https://www.journaldev.com/23598/python-raw-string
+    Ejemplo:
+'''
+print(r'hola\nmarlo\nloyola') # hola\nmarlo
     
-    AHORA SI!: https://platzi.com/clases/1378-python-practico/14186-actualizacion-de-cliente/
+print('hola\nmarlo\nloyola') # hola
+                             # marlo
+                             # loyola
+                             
+                             
 '''
+    Decoradores
+    - @property: Establece un método como propiedad
+    - @[PROPIEDAD].setter: Establece un método como seteador para la propiedad indicada en [PROPIEDAD]
+'''
+class Person:
+    
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+        
+    @property
+    def description(self):
+        return 'Hi, i am ' + self.name + ' and my age is ' + self.age
+    
+    @description.setter
+    def description(self, description):
+        # dividimos valor recibido y actualizamos propiedades name" y "age"
+        name, any, age = description.split()
+        self.name = name
+        self.age = age
+    
+person = Person('Marlo', '29')
+print(person.name) # Marlo
+print(person.age) # 29
+print(person.description) # Hi, i am Marlo and my age is 29
 
+# Cambiamos el valor de name 
+person.name = 'Nieve'
+# dado que "description" es un método realmente retornará la info de la instancia
+print(person.description) # Hi, i am Nieve and my age is 29
+
+# Cambiamos el valor del atributo "description"
+person.description = 'Lula is 31'
+print(person.name) # Lula
+print(person.age) # 31
+print(person.description) # Hi, i am Lula and my age is 31
+
+'''
+    Rangos
+    range(inicio, fin, pasos): genera una secuencia de enteros, sin incluir el "fin"
+'''
+rango_1 = range(0, 10, 2)
+rango_2 = range(0, 9, 2)
+
+# Comparación de valor con "=="
+print(rango_1 == rango_2) # True, ya que no se incluye el "fin" serán iguales
+
+# Comparación de objeto (espacio en memoria) con "is"
+# Podemos hacer uso de la función id(obj) para ver 
+print(rango_1 is rango_2) # Flase, ya que no apuntan al mismo objeto en memoria.
+
+'''
+ACA ME QUEDO:
+- https://platzi.com/clases/1393-fundamentos-matematicas/14590-a-practicar-lo-aprendido/
+- DESPUES VAS A LA DE ALGORITMOS
+- ALTERNAS TBN CON CLASES DE GIT
+'''
 

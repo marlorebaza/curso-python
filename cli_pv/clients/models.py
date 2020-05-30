@@ -2,6 +2,8 @@ import uuid
 
 class Client:
     
+    list = []
+    
     def __init__(self, name, company, email, position, uid=None):
         self.name = name
         self.company = company
