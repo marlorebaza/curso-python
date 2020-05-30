@@ -1,0 +1,31 @@
+{% extends 'index.html' %}
+
+{% block body %}
+
+	<form method="post">
+		<input type="hidden" name="uid" value="{{ contact.key.id if contact and contact.key else '' }}" />
+	  <fieldset>
+	    <legend>Contacto</legend>
+	
+	    <label for="name">Nombre</label>
+	    <input id="name" name="name" type="text" value="{{ contact.name if contact else '' }}">
+	
+	    <label for="phone">Teléfono</label>
+	    <input id="phone" name="phone" type="text" value="{{ contact.phone if contact else '' }}">
+	
+	    <label for="email">Email</label>
+	    <input id="email" name="email" type="email" value="{{ contact.email if contact else '' }}">
+	
+		{% if contact %}
+			<button type="submit" onclick="document.getElementsByTagName('form')[0].action='/delete_contact';">Eliminar</button>
+	    	<button type="submit" onclick="document.getElementsByTagName('form')[0].action='/put_contact';">Actualizar</button>
+	    {% else %}
+	    	<button type="submit" onclick="document.getElementsByTagName('form')[0].action='/add_contact';" >Añadir</button>
+	    {% endif %}
+	  </fieldset>
+	</form>
+	
+	<p>
+	  <a href="/contacts">Regresar</a>
+	</p>
+{% endblock %}

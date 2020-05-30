@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+
+{% block body %}
+
+	{% with messages = get_flashed_messages() %}
+	
+		{% if messages %}
+			
+			{% for message in messages %}
+				<p>{{ message }}</p>
+			{% endfor %}
+		
+		{% endif %}
+	
+	{% endwith %}
+	
+	<ul>
+		{% for contact in contacts %}
+			<li>
+				{{ contact.name }} <a href="/contacts/{{ contact.key.id }}">Ver más.</a>
+			</li>
+		{% endfor %}
+	</ul>
+	<p>
+		<a href="/add_contact">Añadir contacto</a>
+	</p>
+	<p>
+		<a href="delete_all_contacts" style="color: red; font-weight: bold;">Eliminar todos los contactos!</a>
+	</p>
+{% endblock %}

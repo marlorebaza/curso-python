@@ -1,0 +1,132 @@
+Instalar SDK google
+1. Descargar paquete que corresponda de la tabla del siquiente link: 
+https://cloud.google.com/sdk/docs/#install_the_latest_cloud_sdk_version
+2. Extraer el contenido en la ruta deseada.
+3. Ejecutar el script "install.sh" que está dentro; para que comience la instalación. 
+En caso de mostrarse algunas preguntas responderlas como se requiera.
+
+Configurar archivos para proyecto app engine:
+Para una aplicación simple en python el archivo app.yaml basta que contenga la entrada "runtime", 
+que es el nombre de entorno de la aplicación. Por ejemplo: python3
+> Configuración de entorno de desarrollo: https://cloud.google.com/appengine/docs/standard/python3/configuring-your-app-with-app-yaml
+> Configuración de archivo app.yaml: https://cloud.google.com/appengine/docs/standard/python3/config/appref
+> Archivos de configuración: https://cloud.google.com/appengine/docs/standard/python3/apis#archivos-de-configuracin
+
+Iniciar servidor google local:
+FUENTE: https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app
+> El SDK de google contiene el servidor local de desarrollo: dev_appserver.py: 
+https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app#local-dev-server 
+Más opciones de este comando: https://cloud.google.com/appengine/docs/standard/python3/tools/local-devserver-command
+Tener en cuenta que desde la documentación de google recomiendan ejecutar localmente nuestro proyecto haciendo uso de "python",
+en lugar de este comando.
+> Al ejecutar este comando: dev_appserver.py --application=PROJECT_ID app.yaml, obtuve el error:
+"ERROR: Python 3 and later is not compatible with the Google Cloud SDK. Please use Python version 2.7.x"
+Para solventar este error cambié la version de python del SDK de google de la siguiente forma: export CLOUDSDK_PYTHON=python2.7, 
+pero arrojó otro error; es por esto que no usé esta forma.
+
+Crear y descargar clave de la cuenta de servicio
+FUENTE: https://cloud.google.com/docs/authentication/production#creating_a_service_account
+ADICIONAL: https://cloud.google.com/docs/authentication/getting-started
+1. Ingresar a https://console.cloud.google.com/apis/credentials/serviceaccountkey
+2. Seleccionar del combo "Nueva cuenta de servicio"
+3. Ingresar un nombre
+4. Seleccionar en rol: Proyecto > Propietario 
+5. Marcar como tipo de clave: JSON
+6. Seleccionar "Crear" y se descargará un archivo JSON con las credenciales
+7. Configurar variable de credenciales: export GOOGLE_APPLICATION_CREDENTIALS="RUTA_ARCHIVO_JSON"
+NOTA: También es posible realizar esto por línea de comandos, ver link de la fuente.
+
+Entorno local usado por mí:
+1. Creación y activación de entorno virtual
+virtualenv --python=python3 env
+source env/bin/activate
+2. Instalación de dependencias
+pip install requirements.txt 
+3. Inicio de aplicación
+python3 main.py
+
+Instalación y configuraciòn de emulador datastore
+FUENTE: https://cloud.google.com/datastore/docs/tools/datastore-emulator
+1. Instalar emulador 
+gcloud components install cloud-datastore-emulator
+2. Iniciar emulador
+gcloud beta emulators datastore start --project=PROJECT_ID
+3. Si se quiere apuntar al datastore local se debe ejecutar el siguiente comando (Ejecución con sustitución de comandos):
+$(gcloud beta emulators datastore env-init)
+Esto configura las variables de ambiente necesarias para apuntar al datastore local. Se debe realizar cada vez que se 
+inicia el emulador porque los puertos asignados cambian dinámicamente.
+> Más detalle sobre sustitución de comandos: https://www.ediciones-eni.com/open/mediabook.aspx?idR=96d7347a2a6ece4ad9b465d2f1480664
+> Si se quiere apuntar al datastore en la nube, quitar las variables exportadas, con el siguiente comando:
+$(gcloud beta emulators datastore env-unset)
+> NOTA: Por defecto el archivo de la bd local será: 
+~/.config/gcloud/emulators/datastore/WEB-INF/appengine-generated/local_db.binemulators
+
+Configurar y desplegar proyecto en app engine
+1. Logearse a google
+gcloud auth login
+2. Subir y deployar proyecto
+gcloud app deploy --project PROJECT_ID
+3. Ver proyecto en navegador
+gcloud app browse
+> Si se quiere ignorar archivos o directorios al deployar el proyecto hacer uso del archivo: .gcloudignore
+FUENTE: https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore
+> Adicionales
+Listar proyectos: gcloud projects list
+Setear proyecto actual: gcloud config set project PROJECT_ID
+Listar propiedades configuradas: gcloud config list
+Obtener código fuente 
+
+Iniciar proyecto localmente
+1. gcloud beta emulators datastore start --project=python-31051994
+2. $(gcloud beta emulators datastore env-init)
+NOTA:
+Este comando arroja las URLs en notación IPv6, es decir "::1" en lugar de "localhost". Y al exportarse las variables con esta
+notación no son reconocidas por la aplicaciòn y no se llega al datastore.
+Puedo solucionar esto de 2 formas:
+- Solución 1: Exportar las variables manualmente con los siguientes comandos:
+export DATASTORE_EMULATOR_HOST="localhost:PUERTO" => Normalmente el PUERTO es 8680
+export DATASTORE_PROJECT_ID="python-31051994"
+- Solución 2: Iniciar el emulador, agregado al comando del paso 1 la opción: --host-port=localhost:8888, de esta forma las URLs
+del paso 2 tendràn esta notación.
+3. export GOOGLE_APPLICATION_CREDENTIALS="/Users/marlorebazaloyola/Desktop/programacion/python-31051994-586f28f83517.json"
+4. source env/bin/activate
+5. python3 main.py
+
+Credenciales predetrminadas de la aplicación
+FUENTE: https://cloud.google.com/sdk/gcloud/reference/auth/application-default
+- autenticarse
+gcloud auth application-default login 
+- Terminar sesion (revocar)
+gcloud auth application-default revoke 
+- Crear llave
+gcloud iam service-accounts keys create RUTA_LLAVE_JSON
+- Exportar llave
+export GOOGLE_APPLICATION_CREDENTIALS=RUTA_LLAVE_JSON
+NOTA:
+Con la intención de encontrar una forma de no tener que exportar la variable de entorno GOOGLE_APPLICATION_CREDENTIALS con la
+llave del proyecto que quiero probar con el emulador local de datastore intenté logeandome con application-default, 
+pero revoqué las credenciales por si a caso porque obtenía el siguiente warning al consumir mis servicios:
+/Users/marlorebazaloyola/Desktop/programacion/curso-python/gcloud/env/lib/python3.7/site-packages/google/auth/_default.py:69: 
+UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK. 
+We recommend that most server applications use service accounts instead. If your application continues to use 
+end user credentials from Cloud SDK, you might receive a "quota exceeded" or "API not enabled" error. 
+For more information about service accounts, see https://cloud.google.com/docs/authentication/
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+
+Ver código fuente de versiones de un determinado proyecto de app engine
+https://console.cloud.google.com/debug
+
+Ver errores de un determinado proyecto de app engine
+https://console.cloud.google.com/errors
+
+Cloud Datastore (BD no SQL)
+https://cloud.google.com/appengine/docs/standard/python3/using-cloud-datastore
+
+Librería cliente para datastore
+https://cloud.google.com/datastore/docs/reference/libraries
+... para python especificamente:
+https://googleapis.dev/python/datastore/latest/client.html
+
+Manejo de entidades, propiedades y claves en datastore
+https://cloud.google.com/datastore/docs/concepts/entities
+
